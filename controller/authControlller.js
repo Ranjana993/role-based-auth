@@ -1,31 +1,41 @@
-const User = require("../models/user_model")
-const bcrypt = require("bcryptjs")
+const User = require("../models/user_model");
+const bcrypt = require("bcryptjs");
 
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body
-    console.log(req.body);
-    
+    const { name, email, password } = req.body;
+
+    // Check if all fields are provided
     if (!(name && email && password)) {
-      res.status(201).json({ message: "please enter your all information  " })
+      return res.status(400).json({ message: "Please enter all required information." });
     }
-    const isEsistingUser = await User.find({ email });
-    if (isEsistingUser) {
-      res.status(202).json({ messgae: "User already exists with this email address" });
+
+    // Check if the user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists with this email address." });
     }
-    const hashedPassword = await bcrypt.hash(password);
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new user
     const newUser = new User({
       name,
       email,
       password: hashedPassword,
-    })
-    newUser.save()
-    res.status(200).json({ message: "User saved successfully", data: newUser })
+    });
+
+    // Save the new user
+    await newUser.save();
+
+    return res.status(201).json({ message: "User registered successfully", data: newUser });
   } catch (error) {
-    res.status(500).json({ message: "Server side error while registering user " })
+    console.error("Error in registerUser:", error);
+    return res.status(500).json({ message: "Server error while registering user." });
   }
-}
+};
 
 module.exports = {
   registerUser
-}
+};

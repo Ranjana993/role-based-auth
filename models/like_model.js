@@ -13,6 +13,6 @@ const LikeSchema = mongoose.Schema({
   },
 })
 
-const Like = mongoose.model.model('User', LikeSchema)
+const Like = mongoose.model.model('Like', LikeSchema)
 
 module.exports = Like

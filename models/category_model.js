@@ -5,6 +5,6 @@ const CategorySchema = mongoose.Schema({
 
 })
 
-const Category = mongoose.model.model('User', CategorySchema)
+const Category = mongoose.model.model('Category', CategorySchema)
 
 module.exports = Category

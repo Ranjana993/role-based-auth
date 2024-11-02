@@ -14,6 +14,6 @@ const CommentSchema = mongoose.Schema({
   comments: { type: String, required: true }
 })
 
-const Comment = mongoose.model.model('User', CommentSchema)
+const Comment = mongoose.model.model('Comment', CommentSchema)
 
 module.exports = Comment

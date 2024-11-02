@@ -1,5 +1,6 @@
 const User = require("../models/user_model");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken")
 
 const registerUser = async (req, res) => {
   try {
@@ -36,6 +37,51 @@ const registerUser = async (req, res) => {
   }
 };
 
+
+const generateAccessToken = async (user) => {
+  const token = jwt.sign(user, process.env.ACESS_SECRET_TOKEN, {
+    expiresIn: '2h'
+  })
+  return token;
+}
+
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    console.log(email, password);
+
+    // Check if user exists
+    const existingUser = await User.findOne({ email: email });
+    if (!existingUser) {
+      return res.status(404).json({ success: false, message: "User not found with this email ID" });
+    }
+
+    // Compare the entered password with the stored hashed password
+    const matchPassword = await bcrypt.compare(password, existingUser.password);
+    if (!matchPassword) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+    const accessToken = await generateAccessToken({ user: existingUser })
+    // console.log(accessToken);
+    
+    // Login successful
+    return res.status(200).json(
+      {
+        success: true,
+        message: "Successfully logged in",
+        data: existingUser,
+        token: accessToken,
+        tokenType: 'Bearer'
+      }
+    );
+  } catch (error) {
+    return res.status(500).json({ message: "Error while logging in user", error: error.message });
+  }
+};
+
+
+
 module.exports = {
-  registerUser
+  registerUser,
+  loginUser
 };

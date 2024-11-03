@@ -1,20 +1,16 @@
 const mongoose = require("mongoose")
 
 const userPermissionSchema = mongoose.Schema({
-  user_id: {
-    type: mongoose.Schema.Type.ObjectId,
-    required: true,
-    ref: 'User'
+  permission_name: {
+    type: String,
+    required: true
   },
-  permission: [
-    {
-      permission_name: String,
-      permission_value: [Number]
-    }
-  ]
-
+  _is_default: {
+    type: Number,
+    default: 0  // 0 not default and 1 => default
+  }
 })
 
-const Permission = mongoose.model.model('userPermission', userPermissionSchema)
+const Permission = mongoose.model('userPermission', userPermissionSchema)
 
 module.exports = Permission

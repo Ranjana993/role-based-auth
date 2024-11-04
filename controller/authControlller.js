@@ -63,7 +63,7 @@ const loginUser = async (req, res) => {
     }
     const accessToken = await generateAccessToken({ user: existingUser })
     // console.log(accessToken);
-    
+
     // Login successful
     return res.status(200).json(
       {
@@ -79,9 +79,21 @@ const loginUser = async (req, res) => {
   }
 };
 
+const getProfile = async (req, res) => {
+  try {
+    const user_id = req.user._id;
+    const userData = await User.findOne({_id:user_id , })
+    console.log(req);
+
+    return res.status(200).json({ success: true, message: "Successfully got your profile", data: userData });
+  } catch (error) {
+    return res.status(500).json({ success: false,  message: "Error while getting profile" });
+  }
+}
 
 
 module.exports = {
   registerUser,
-  loginUser
+  loginUser,
+  getProfile
 };

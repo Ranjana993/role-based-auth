@@ -5,7 +5,7 @@ const userPermissionSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  _is_default: {
+  is_default: {
     type: Number,
     default: 0  // 0 not default and 1 => default
   }

@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const verifyToken = async (req, res, next) => {
   // Retrieve token from body, query, or headers
   const token = req.body.token || req.query.token || req.headers["authorization"];
-// console.log(token);
+  // console.log(token);
 
   // Check if token is provided
   if (!token) {
@@ -14,7 +14,7 @@ const verifyToken = async (req, res, next) => {
     // Check if token follows 'Bearer <token>' format
     const bearer = token.split(" ");
     // console.log(bearer);
-    
+
     if (bearer[0] !== "Bearer" || !bearer[1]) {
       return res.status(400).json({ success: false, message: "Invalid token format" });
     }

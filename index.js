@@ -3,6 +3,7 @@ const express = require("express")
 const connectDB = require("./config/db_connect");
 const route = require("./routes/authRoute")
 const adminRoute = require("./routes/adminRoutes")
+const categoryRouter = require("./routes/commonRoute")
 const app = express();
 
 const PORT = process.env.PORT || 8000;
@@ -16,6 +17,7 @@ app.use(express.static("public"));
 // Using routes
 app.use("/api", route);
 app.use("/api/admin" , adminRoute)
+app.use("/api" , categoryRouter)
 
 app.get("/", (req, res) => {
   res.send("<h1>Welcome to backend side 🙏</h1>");
@@ -24,7 +26,7 @@ app.get("/", (req, res) => {
 // Connect to the database and handle errors
 connectDB().catch((error) => {
   console.error("Database connection failed:", error);
-  process.exit(1); // Exit the process with failure code
+  process.exit(1); 
 });
 
 app.listen(PORT, () => {

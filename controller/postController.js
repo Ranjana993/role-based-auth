@@ -38,4 +38,55 @@ const getPost = async (req, res) => {
 }
 
 
-module.exports = { createPost, getPost }
+
+const deletePost = async (req, res) => {
+  try {
+    const { id } = req.body
+    const isExist = await Post.findOne({ _id: id })
+    if (!isExist) {
+      return res.status(400).json({ success: false, message: " Post not exist " })
+    }
+    await Post.findByIdAndDelete({ _id: id })
+    return res.status(200).json({ success: true, message: "Post deleted  successfully " })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "something went wrong while deleting post ", error: error })
+  }
+}
+
+const updatePost = async (req, res) => {
+  try {
+    const { id, title, description, categories } = req.body;
+
+    // Check if the post exists
+    const isExist = await Post.findOne({ _id: id });
+    if (!isExist) {
+      return res.status(400).json({ success: false, message: "Post does not exist" });
+    }
+
+    // Build the update object
+    const updateObj = { title, description };
+    if (categories) {
+      updateObj.categories = categories;
+    }
+
+    // Update the post
+    const updatedData = await Post.findByIdAndUpdate(id, updateObj, { new: true });
+
+    // Check if the update was successful
+    if (!updatedData) {
+      return res.status(404).json({ success: false, message: "Failed to update the post" });
+    }
+
+    // Return success response
+    return res.status(200).json({ success: true, message: "Post updated successfully", data: updatedData });
+  } catch (error) {
+    // Handle errors
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong while updating the post",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { createPost, getPost, deletePost, updatePost }

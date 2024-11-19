@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const verifyToken = async (req, res, next) => {
   // Retrieve token from body, query, or headers
   const token = req.body.token || req.query.token || req.headers["authorization"];
-  // console.log(token);
 
   // Check if token is provided
   if (!token) {
@@ -19,6 +18,8 @@ const verifyToken = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Invalid token format" });
     }
 
+    // console.log(token);
+    
     // Verify the token
     const decodedData = await jwt.verify(bearer[1], process.env.ACESS_SECRET_TOKEN);
     req.user = decodedData.user;

@@ -16,8 +16,8 @@ app.use(express.static("public"));
 
 // Using routes
 app.use("/api", route);
-app.use("/api/admin" , adminRoute)
-app.use("/api" , categoryRouter)
+app.use("/api/admin", adminRoute)
+app.use("/api", categoryRouter)
 
 app.get("/", (req, res) => {
   res.send("<h1>Welcome to backend side 🙏</h1>");
@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
 // Connect to the database and handle errors
 connectDB().catch((error) => {
   console.error("Database connection failed:", error);
-  process.exit(1); 
+  process.exit(1);
 });
 
 app.listen(PORT, () => {

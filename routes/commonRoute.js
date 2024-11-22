@@ -3,7 +3,7 @@ const commonRoute = express.Router();
 const verifyToken = require('../middleware/authmiddleware');
 const { addCategory, getCategory, deleteCategory, updateCategory } = require('../controller/categoryController');
 const { createPost, getPost, deletePost, updatePost } = require('../controller/postController');
-const { createUser } = require('../controller/userController');
+const { createUser, getUser, updateUser } = require('../controller/userController');
 
 //  add category 
 commonRoute.post("/add-category", verifyToken, addCategory)
@@ -22,7 +22,8 @@ commonRoute.post("/update-post", verifyToken, updatePost)
 
 // for users
 commonRoute.post("/create-user", verifyToken, createUser)
-
+commonRoute.get("/get-user", verifyToken, getUser)
+commonRoute.post("/update-user", verifyToken, updateUser)
 
 module.exports = commonRoute
 

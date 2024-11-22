@@ -27,7 +27,6 @@ const createUser = async (req, res) => {
     }
     const user = new User(obj);
     const newUser = await user.save();
-    console.log("password ", password);
     const content = `
     <p>Hii <b> `+ newUser.name + ` ,</b> Your account has been created , below is your details  </p>
     <Table style=""border-style:none>
@@ -39,21 +38,84 @@ const createUser = async (req, res) => {
       <th>Email :- </th>
       <td>`+ newUser.email + ` </td>
     </tr>
-        <tr>
+    <tr>
       <th>Password :- </th>
-      <td>`+ newUser.password + ` </td>
+      <td>`+ password + ` </td>
     </tr>
     </table>
     <p>Now you can login  and Enjoy a great experience , 
     Thanks </p>
 `
-    console.log(newUser.email);
 
-    sendMailer(newUser.email, "Account created ", content)
-    console.log("Account created successfully ")
+
+    await sendMailer(newUser.email, "Account created ", content)
+    // console.log("Account created successfully ")
     return res.status(200).json({ success: true, message: "user created successfully ! ", data: newUser })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Error while creating user ", error: error })
   }
 }
-module.exports = { createUser }
+
+
+
+
+const getUser = async (req, res) => {
+  try {
+    console.log(req.user);
+    const users = await User.find({
+      _id: {
+        $ne: req.user._id
+      }
+    })
+
+    return res.status(200).json({ success: true, message: "Successfully fetched user ", data: users })
+
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Error while getting user ", error: error })
+  }
+}
+
+const updateUser = async (req, res) => {
+  try {
+    const { id, name, role } = req.body;
+
+    // Check if the user exists
+    const isExist = await User.findOne({ _id: id });
+    
+    if (!isExist) {
+      return res.status(400).json({ success: false, message: "User does not exist!" });
+    }
+
+    // Prepare the update object
+    const updateObj = {};
+    if (name) updateObj.name = name;
+    if (role !== undefined) updateObj.role = role;
+
+    // Update user data
+    const updatedData = await User.findByIdAndUpdate(
+      id,                  // Directly pass the ID
+      { $set: updateObj }, // Apply the update
+      { new: true }        // Return the updated document
+    );
+
+    if (!updatedData) {
+      return res.status(500).json({ success: false, message: "Failed to update user data." });
+    }
+
+    console.log("Updated Data:", updatedData);
+
+    // Send success response
+    return res.status(200).json({ success: true, message: "User data updated successfully!", newData: updatedData });
+
+  } catch (error) {
+    console.error("Error updating user:", error.message);
+    return res.status(500).json({ success: false, message: "Error while updating user", error: error.message });
+  }
+};
+
+
+
+
+
+
+module.exports = { createUser, getUser, updateUser }

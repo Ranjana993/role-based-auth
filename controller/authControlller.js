@@ -1,6 +1,8 @@
-const User = require("../models/user_model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken")
+const User = require("../models/user_permission_model");
+const Permission = require("../models/permission_model");
+
 
 const registerUser = async (req, res) => {
   try {
@@ -29,7 +31,25 @@ const registerUser = async (req, res) => {
 
     // Save the new user
     await newUser.save();
+    const defaultPermission = await Permission.find({ is_default: 1 })
+    if (defaultPermission.length > 0) {
+      const permissionArray = [];
+      defaultPermission.forEach(permission => {
+        permissionArray.push({
+          permission_name: permission.permission_name,
+          permission_value: [0, 1, 2, 3]
+        })
+      })
 
+
+
+      new User({
+        user_id: newUser.id,
+        permission: permissionArray
+      })
+      await User.save();
+    }
+    //  assiging default persmissios
     return res.status(201).json({ message: "User registered successfully", data: newUser });
   } catch (error) {
     console.error("Error in registerUser:", error);
@@ -82,12 +102,12 @@ const loginUser = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     const user_id = req.user._id;
-    const userData = await User.findOne({_id:user_id , })
+    const userData = await User.findOne({ _id: user_id, })
     console.log(req);
 
     return res.status(200).json({ success: true, message: "Successfully got your profile", data: userData });
   } catch (error) {
-    return res.status(500).json({ success: false,  message: "Error while getting profile" });
+    return res.status(500).json({ success: false, message: "Error while getting profile" });
   }
 }
 

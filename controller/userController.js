@@ -81,7 +81,7 @@ const updateUser = async (req, res) => {
 
     // Check if the user exists
     const isExist = await User.findOne({ _id: id });
-    
+
     if (!isExist) {
       return res.status(400).json({ success: false, message: "User does not exist!" });
     }
@@ -113,9 +113,27 @@ const updateUser = async (req, res) => {
   }
 };
 
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    // Check if the user exists
+    const isExist = await User.findOne({ _id: id });
+
+    if (!isExist) {
+      return res.status(400).json({ success: false, message: "User does not exist!" });
+    }
+
+    await User.findByIdAndDelete({ _id: id })
+    return res.status(200).json({ success: true, message: "User data deleted successfully!" });
+
+  } catch (error) {
+    console.error("Error deleting user:", error.message);
+    return res.status(500).json({ success: false, message: "Error while deleting user", error: error.message });
+  }
+}
 
 
 
 
-
-module.exports = { createUser, getUser, updateUser }
+module.exports = { createUser, getUser, updateUser, deleteUser }

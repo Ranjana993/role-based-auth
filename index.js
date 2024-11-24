@@ -2,7 +2,8 @@ require("dotenv").config();
 const express = require("express")
 const connectDB = require("./config/db_connect");
 const route = require("./routes/authRoute")
-const commonRoute = require("./routes/commonRoute")
+const commonRoute = require("./routes/commonRoute");
+const adminRoute = require("./routes/adminRoutes");
 const app = express();
 
 const PORT = process.env.PORT || 8000;
@@ -15,7 +16,7 @@ app.use(express.static("public"));
 
 // Using routes
 app.use("/api", route);
-app.use("/api/admin", commonRoute)
+app.use("/api/admin", adminRoute)
 app.use("/api", commonRoute)
 
 app.get("/", (req, res) => {

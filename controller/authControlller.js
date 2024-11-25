@@ -1,7 +1,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken")
-const User = require("../models/user_permission_model");
+const User_Permission = require("../models/user_permission_model");
 const Permission = require("../models/permission_model");
+const User = require("../models/user_model");
 
 
 const registerUser = async (req, res) => {
@@ -16,41 +17,44 @@ const registerUser = async (req, res) => {
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ message: "User already exists with this email address." });
+      return res.status(200).json({ message: "User already exists with this email address." });
     }
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create a new user
-    const newUser = new User({
+    const user = new User({
       name,
       email,
       password: hashedPassword,
     });
 
     // Save the new user
-    await newUser.save();
+    const userData = await user.save();
+
     const defaultPermission = await Permission.find({ is_default: 1 })
+
     if (defaultPermission.length > 0) {
-      const permissionArray = [];
+      var permissionArray = [];
       defaultPermission.forEach(permission => {
         permissionArray.push({
           permission_name: permission.permission_name,
           permission_value: [0, 1, 2, 3]
         })
       })
+      console.log("defaultPermission", defaultPermission);
 
 
 
-      new User({
-        user_id: newUser.id,
+      const userPermission  = new User_Permission({
+        user_id: userData.id,
         permission: permissionArray
       })
-      await User.save();
+      await userPermission.save();
     }
     //  assiging default persmissios
-    return res.status(201).json({ message: "User registered successfully", data: newUser });
+    return res.status(201).json({ message: "User registered successfully", data: userData });
   } catch (error) {
     console.error("Error in registerUser:", error);
     return res.status(500).json({ message: "Server error while registering user." });

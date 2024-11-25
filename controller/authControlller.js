@@ -47,7 +47,7 @@ const registerUser = async (req, res) => {
 
 
 
-      const userPermission  = new User_Permission({
+      const userPermission = new User_Permission({
         user_id: userData.id,
         permission: permissionArray
       })
@@ -72,7 +72,7 @@ const generateAccessToken = async (user) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(email, password);
+    // console.log(email, password);
 
     // Check if user exists
     const existingUser = await User.findOne({ email: email });
@@ -86,14 +86,50 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
     const accessToken = await generateAccessToken({ user: existingUser })
-    // console.log(accessToken);
+
+    const result = await User.aggregate([
+      {
+        $match: { email: existingUser.email }
+      },
+      {
+        $lookup: {
+          from: "userpermissions",
+          localField: "_id",
+          foreignField: "user_id",
+          as: "permissions"
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          email: 1,
+          role: 1,
+          permissions: {
+            $cond: {
+              if: { $isArray: "$permissions" },
+              then: { $arrayElemAt: ["$permissions", 0] },
+              else: null
+            }
+          },
+        }
+      },
+      {
+        $addFields: {
+          "permissions": {
+            "permissions": "$permissions.permissions"
+          }
+        }
+      }
+    ])
+    console.log("result", result);
 
     // Login successful
     return res.status(200).json(
       {
         success: true,
         message: "Successfully logged in",
-        data: existingUser,
+        data: result[0],
         token: accessToken,
         tokenType: 'Bearer'
       }

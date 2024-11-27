@@ -2,6 +2,10 @@ const randomString = require("randomstring")
 const User = require("../models/user_model")
 const bcrypt = require("bcrypt")
 const sendMailer = require("../helper/mailer")
+const mongoose = require("mongoose");
+const Permission = require("../models/permission_model")
+const UserPermission = require("../models/user_permission_model")
+
 
 const createUser = async (req, res) => {
   try {
@@ -25,8 +29,26 @@ const createUser = async (req, res) => {
     else if (req.body.role) {
       obj.role = req.body.role
     }
+
     const user = new User(obj);
     const newUser = await user.save();
+    if (req.body.permissions != undefined && req.body.permissions.length > 0) {
+      const permissionArray = [];
+      const addPermissionData = req.body.permissions
+
+      await Promise.all(addPermissionData.map(async (permission) => {
+        const permissionData = await Permission.findOne({ _id: permission.id })
+        permissionArray.push({
+          permission_name: permissionData.permission.name,
+          permission_value: permission.value
+        })
+      }))
+      const userPermission = await UserPermission({ user_id: newUser._id, permission: permissionArray })
+      await userPermission.save();
+    }
+
+
+
     const content = `
     <p>Hii <b> `+ newUser.name + ` ,</b> Your account has been created , below is your details  </p>
     <Table style=""border-style:none>
@@ -57,17 +79,47 @@ const createUser = async (req, res) => {
 }
 
 
-
-
 const getUser = async (req, res) => {
   try {
-    console.log(req.user);
-    const users = await User.find({
-      _id: {
-        $ne: req.user._id
+    const users = await User.aggregate([
+      {
+        $match: {
+          _id: {
+            $ne: new mongoose.Types.ObjectId(req.user._id)
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "userpermissions",
+          localField: "_id",
+          foreignField: "user_id",
+          as: "permissions"
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          email: 1,
+          role: 1,
+          permissions: {
+            $cond: {
+              if: { $isArray: "$permissions" },
+              then: { $arrayElemAt: ["$permissions", 0] },
+              else: null
+            }
+          },
+        }
+      },
+      {
+        $addFields: {
+          "permissions": {
+            "permissions": "$permissions.permissions"
+          }
+        }
       }
-    })
-
+    ])
     return res.status(200).json({ success: true, message: "Successfully fetched user ", data: users })
 
   } catch (error) {

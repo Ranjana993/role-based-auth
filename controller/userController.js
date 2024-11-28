@@ -8,7 +8,7 @@ const UserPermission = require("../models/user_permission_model")
 
 
 const createUser = async (req, res) => {
-  try {
+  try { 
     const { name, email } = req.body
     if (!(name || email)) {
       return res.status(401).json({ success: false, message: "Please enter name and email " })
@@ -38,12 +38,14 @@ const createUser = async (req, res) => {
 
       await Promise.all(addPermissionData.map(async (permission) => {
         const permissionData = await Permission.findOne({ _id: permission.id })
+        // console.log("permissionData", permissionData); 
+        
         permissionArray.push({
-          permission_name: permissionData.permission.name,
+          permission_name: permissionData.permission_name,
           permission_value: permission.value
         })
       }))
-      const userPermission = await UserPermission({ user_id: newUser._id, permission: permissionArray })
+      const userPermission = new UserPermission({ user_id: newUser._id, permission: permissionArray })
       await userPermission.save();
     }
 
@@ -145,16 +147,34 @@ const updateUser = async (req, res) => {
 
     // Update user data
     const updatedData = await User.findByIdAndUpdate(
-      id,                  // Directly pass the ID
-      { $set: updateObj }, // Apply the update
-      { new: true }        // Return the updated document
+      id,               
+      { $set: updateObj }, 
+      { new: true }        
     );
+
+    // add  comiing permissions 
+    if (req.body.permissions != undefined && req.body.permissions.length > 0) {
+      const permissionArray = [];
+      const addPermissionData = req.body.permissions
+
+      await Promise.all(addPermissionData.map(async (permission) => {
+        const permissionData = await Permission.findOne({ _id: permission.id })
+        // console.log("permissionData", permissionData); 
+
+        permissionArray.push({
+          permission_name: permissionData.permission_name,
+          permission_value: permission.value
+        })
+      }))
+      const userPermission = new UserPermission({ user_id: updatedData._id, permission: permissionArray })
+      await userPermission.save();
+    }
 
     if (!updatedData) {
       return res.status(500).json({ success: false, message: "Failed to update user data." });
     }
 
-    console.log("Updated Data:", updatedData);
+    // console.log("Updated Data:", updatedData);
 
     // Send success response
     return res.status(200).json({ success: true, message: "User data updated successfully!", newData: updatedData });

@@ -5,35 +5,36 @@ const { addCategory, getCategory, deleteCategory, updateCategory } = require('..
 const { createPost, getPost, deletePost, updatePost } = require('../controller/postController');
 const { createUser, getUser, updateUser, deleteUser } = require('../controller/userController');
 const { postLike, postunLike, postLikeCounters } = require('../controller/likeController');
+const checkPermission = require('../middleware/checkPermission');
 
 //  add category 
 commonRoute.post("/add-category", verifyToken, addCategory)
-commonRoute.get("/get-category", verifyToken, getCategory)
-commonRoute.post("/delete-category", verifyToken, deleteCategory)
-commonRoute.post("/update-category", verifyToken, updateCategory)
+commonRoute.get("/get-category", verifyToken, checkPermission, getCategory)
+commonRoute.post("/delete-category", verifyToken, checkPermission, deleteCategory)
+commonRoute.post("/update-category", verifyToken, checkPermission, updateCategory)
 
 
 // POST ROUTING .....
-commonRoute.post("/create-post", verifyToken, createPost)
-commonRoute.get("/get-post", verifyToken, getPost)
+commonRoute.post("/create-post", verifyToken, checkPermission, createPost)
+commonRoute.get("/get-post", verifyToken, checkPermission, getPost)
 
-commonRoute.post("/delete-post", verifyToken, deletePost)
+commonRoute.post("/delete-post", verifyToken, checkPermission, deletePost)
 
-commonRoute.post("/update-post", verifyToken, updatePost)
+commonRoute.post("/update-post", verifyToken, checkPermission, updatePost)
 
 // for users
-commonRoute.post("/create-user", verifyToken, createUser)
-commonRoute.get("/get-user", verifyToken, getUser)
-commonRoute.post("/update-user", verifyToken, updateUser)
+commonRoute.post("/create-user", verifyToken, checkPermission, createUser)
+commonRoute.get("/get-user", verifyToken, checkPermission, getUser)
+commonRoute.post("/update-user", verifyToken, checkPermission, updateUser)
 
-commonRoute.post("/delete-user", verifyToken, deleteUser)
+commonRoute.post("/delete-user", verifyToken, checkPermission, deleteUser)
 
 
 
 //  like & unlike routes
-commonRoute.post("/post-like", verifyToken, postLike)
-commonRoute.post("/post-unlike", verifyToken, postunLike)
-commonRoute.post("/like-counters", verifyToken, postLikeCounters)
+commonRoute.post("/post-like", verifyToken, checkPermission, postLike)
+commonRoute.post("/post-unlike", verifyToken, checkPermission, postunLike)
+commonRoute.post("/like-counters", verifyToken, checkPermission, postLikeCounters)
 
 module.exports = commonRoute
 
